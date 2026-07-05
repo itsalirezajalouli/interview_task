@@ -1,0 +1,10 @@
+[project]
+name = "interview"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.5.1",
+    "sentence-transformers>=5.6.0",
+]
