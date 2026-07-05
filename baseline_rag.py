@@ -52,7 +52,7 @@ def retrieve(query, chunks, vectors, model):
 def answer(query, chunks, vectors, model):
     hit, score = retrieve(query, chunks, vectors, model)
     # Returns the single best-matching chunk as the answer.
-    return f"[{hit['doc_id']}] {hit['text']}"
+    return f"[{hit['doc_id']} | {score:3f}] {hit['text']}"
 
 
 if __name__ == "__main__":
