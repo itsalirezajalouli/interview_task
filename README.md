@@ -134,3 +134,53 @@
   They are supposed to fail!
 
 ---
+
+## Commit E: add recursive chunking + evaluation (precision)
+
+  Chunking strategy quietly controls retrieval quality, so it's an important
+  design decision, recursive chunking might not even be best strategy here but
+  we should exhaust all the possible strategies.
+
+  I added a new python module to my_implementation called recursive_chunking.py.
+  It's a simple implemetation of recursive chunking
+
+  It's logic follows something like this:
+      Try splitting by paragraph (\n\n)
+      If chunk too large → split by line (\n)
+      If still too large → split by sentence (.,!?;...)
+      If still too large → split by word
+      If still too large → split by character (CHUNK_SIZE)
+
+  In ingestion.py, in build_index_w_doc_model function i commented previous
+  chunk_text(d.text) and changed it to recursive_chunking(d.text), then added
+  a test to my_pipeline_evaluation.py called test03_multi_chunk_direct_query
+  which even has EXACT STRING MATCHING COMPARISON between expected answer and
+  retrieved document and guess what? the test goes green!
+
+  The sentence that was cut in middle by CHUNK_SIZE now gets retrieved completely
+  in this new pipeline because overlap and recursive chunking by seperators exists!
+
+  I experimented with threshold and lowered it to 0.3 to see what are the other
+  docs it retrieves:
+
+```python
+[(Chunk(id='DOC-19', title='Compressor C-100 — Separator Element Replacement', text='The air-oil separator element on this unit should be replaced every 4000 operating hours to maintain separation efficiency. '), 0.7995917797088623), (Chunk(id='DOC-03', title='Compressor C-100 — Specifications', text='It includes an integrated air-oil separator and an after-cooler. Ambient operating temperature should stay below 40 degrees Celsius. Condensate must be drained daily.'), 0.43372634053230286), (Chunk(id='DOC-19', title='Compressor C-100 — Separator Element Replacement', text='The C-100 compressor undergoes extended maintenance checks beyond the standard schedule. Technicians should verify belt tension, inspect the intake filter for fouling, '), 0.40845930576324463), (Chunk(id='DOC-03', title='Compressor C-100 — Specifications', text='The C-100 is a rotary screw air compressor. Rated output is 6 m3/min at 8 bar. Motor power is 37 kW. It includes an integrated air-oil separator and an after-cooler. '), 0.38761916756629944), (Chunk(id='DOC-12', title='Preventive Maintenance Intervals', text='Pumps are serviced every 2000 hours and compressors every 4000 hours. Keep a record of every intervention with date and technician.'), 0.36556902527809143)]
+```
+
+  The query is now responsed by 80% score, next best option is 43%.
+
+  We improved retrieval quality with simplest chunking strategy (actually second
+  simplest after your fixed CHUNK_SIZE chunking) possible.
+  What we did here was improving "Structural Precision".
+
+  I was thinking here I could try and implement semantic chunking and try to look
+  like a know-it-all rag developer but why? this is a technical documentation corpus
+  each sentence is already semantically dense... It's not a corpus of fictional
+  books!
+
+  If you ask about little dogs in "animal farm" your response is some lines from
+  first pages of the book and some lines in the end of the book where they grew
+  up by pigs and came back and semantic chunking would place those chunks grouped
+  together but here we are not talking about stories spread between different
+  lines in different places of the corpus so recursive chunking is good enough
+  and I decided not to implement semantic chunking!

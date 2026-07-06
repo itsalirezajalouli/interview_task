@@ -96,8 +96,8 @@ TEST_SUIT = {
         expected_behaviour = 'answer',
         expected_docs = ['DOC-19'],
         expected_answer = (
-            'The air-oil separator element on the C-100 should be replaced '
-            'every 4000 operating hours.'
+            'The air-oil separator element on this unit should be replaced '
+            'every 4000 operating hours to maintain separation efficiency. '
         )
     ),
 

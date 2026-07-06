@@ -100,7 +100,7 @@ class BaselineEvaluationTests(unittest.TestCase):
             0.3 # let's be generous and see when "DOC-19-chunk-2" appears in the list
         )
 
-        print(answer)
+        # print(answer)
         # I printed to see where in the results "DOC-19-chunk-2" appears:
         # ['DOC-19'(chunk 1), 'DOC-03', 'DOC-12', 'DOC-19'(chunk 1)]
         for chunk, score in answer:
@@ -108,5 +108,10 @@ class BaselineEvaluationTests(unittest.TestCase):
                 chunk.id,
                 expected_docs,
                 'Retrieved documents should match expected documents.'
+            )
+            self.assertEqual(
+                chunk.text,
+                expected_answer,
+                'Retrieved document content should match expected document content exactly'
             )
 

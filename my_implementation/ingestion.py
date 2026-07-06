@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 # internals
 from my_implementation.models import Document, Chunk
+from my_implementation.recursive_chunking import recursive_chunking
 
 # constants
 CHUNK_SIZE = 400
@@ -21,7 +22,9 @@ def build_index_w_doc_model(
 
     chunks: List[Chunk] = []
     for d in docs:
-        for c in chunk_text(d.text):
+        # for c in chunk_text(d.text):
+        # after changin this, my implementation tests should still work: they do!
+        for c in recursive_chunking(d.text):
             chunks.append(
                 Chunk(
                     id = d.id,

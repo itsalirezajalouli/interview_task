@@ -20,7 +20,14 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         query = TEST_SUIT['t01_single_doc_direct_query'].user_query
         expected_docs = TEST_SUIT['t01_single_doc_direct_query'].expected_docs
         expected_answer = TEST_SUIT['t01_single_doc_direct_query'].expected_answer
-        chunks = answer_w_topk(query, self.chunks, self.vectors, self.model, self.score_threshold)
+
+        chunks = answer_w_topk(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.score_threshold
+        )
 
         for chunk, score in chunks: 
             self.assertIn(
@@ -53,8 +60,14 @@ class MyImplementationEvaluationTests(unittest.TestCase):
     def test02_multi_doc_direct_query(self):
         query = TEST_SUIT['t02_multi_doc_direct_query'].user_query
         expected_docs = TEST_SUIT['t02_multi_doc_direct_query'].expected_docs
-        expected_answer = TEST_SUIT['t02_multi_doc_direct_query'].expected_answer
-        chunks = answer_w_topk(query, self.chunks, self.vectors, self.model, self.score_threshold)
+
+        chunks = answer_w_topk(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.score_threshold
+        )
 
         self.assertEqual(
             len(chunks),
@@ -75,3 +88,33 @@ class MyImplementationEvaluationTests(unittest.TestCase):
                 'Retrieved documents should be in expected documents.'
             )
 
+    # Precision
+    def test03_multi_chunk_direct_query(self):
+        query = TEST_SUIT['t03_multi_chunk_direct_query'].user_query
+        expected_docs = TEST_SUIT['t03_multi_chunk_direct_query'].expected_docs
+        expected_answer = TEST_SUIT['t03_multi_chunk_direct_query'].expected_answer
+
+        chunks = answer_w_topk(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.score_threshold
+        )
+
+        for chunk, score in chunks: 
+            self.assertEqual(
+                [chunk.id],
+                expected_docs,
+                'Retrieved document should be equal expected document.'
+            )
+            self.assertEqual(
+                chunk.text,
+                expected_answer,
+                'Retrieved document content should match expected document content exactly'
+            )
+            self.assertGreaterEqual(
+                score,
+                self.score_threshold,
+                f'Retrieved answer score should be greater or equal to {self.score_threshold}.'
+            )
