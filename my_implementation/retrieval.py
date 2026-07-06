@@ -30,7 +30,7 @@ def retrieve(
     return best_chunks_w_scores
 
 
-def answer(
+def answer_w_topk(
     query: StrictStr,
     chunks: List[Chunk],
     vectors: NDArray[np.float64],

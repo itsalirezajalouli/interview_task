@@ -3,8 +3,8 @@ import unittest
 from sentence_transformers import SentenceTransformer
 
 # internals
-from my_implementation.ingestion import build_index
-from my_implementation.retrieval import answer
+from my_implementation.ingestion import build_index_w_doc_model
+from my_implementation.retrieval import answer_w_topk
 from evaluation.tests import TEST_SUIT, EXTENDED_DOCS_FOR_MY_PIPELINE
 
 class MyImplementationEvaluationTests(unittest.TestCase):
@@ -12,7 +12,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         # TODO: later will import load_extended_docs from evaluation.tests
         self.docs = EXTENDED_DOCS_FOR_MY_PIPELINE
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
-        self.chunks, self.vectors = build_index(self.docs, self.model)
+        self.chunks, self.vectors = build_index_w_doc_model(self.docs, self.model)
         self.score_threshold = 0.6 # I might change this, no reason for this number
 
     # Correctness
@@ -20,7 +20,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         query = TEST_SUIT['t01_single_doc_direct_query'].user_query
         expected_docs = TEST_SUIT['t01_single_doc_direct_query'].expected_docs
         expected_answer = TEST_SUIT['t01_single_doc_direct_query'].expected_answer
-        chunks = answer(query, self.chunks, self.vectors, self.model, self.score_threshold)
+        chunks = answer_w_topk(query, self.chunks, self.vectors, self.model, self.score_threshold)
 
         for chunk, score in chunks: 
             self.assertIn(
@@ -54,7 +54,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         query = TEST_SUIT['t02_multi_doc_direct_query'].user_query
         expected_docs = TEST_SUIT['t02_multi_doc_direct_query'].expected_docs
         expected_answer = TEST_SUIT['t02_multi_doc_direct_query'].expected_answer
-        chunks = answer(query, self.chunks, self.vectors, self.model, self.score_threshold)
+        chunks = answer_w_topk(query, self.chunks, self.vectors, self.model, self.score_threshold)
 
         self.assertEqual(
             len(chunks),

@@ -14,7 +14,7 @@ def chunk_text(text, size=CHUNK_SIZE):
     # fixed-size character windows
     return [text[i:i + size] for i in range(0, len(text), size)]
 
-def build_index(
+def build_index_w_doc_model(
     docs: List[Document],
     model: SentenceTransformer
 ) -> Tuple[List[Chunk], NDArray[np.float64]]:

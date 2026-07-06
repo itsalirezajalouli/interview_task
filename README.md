@@ -102,4 +102,35 @@
 
 ---
 
-## Commit D: precision
+## Commit D: add 1 baseline evaluation test (precision)
+
+  Let's pick a random document from existing docs in corpus.jsonl: I picked DOC-03.
+  I will extend the corpus with 2 documents‍ that have similar contents to DOC-03
+  but this time they don't act as documents but CHUNKS! to test CHUNK_SIZE
+  chunking strategy one document will be 400 character (DOC-19-chunk1) and next
+  one will be the rest of that document simulating the split effect (DOC-19-chunk2).
+
+### AI Usage
+
+    Of course, I used AI to generate the new document.
+
+  For test #3 even if we ignore the previous bug and use my implementation instead
+  We get bad results.
+
+  I printed to see where in the results chunk 2 of "DOC-19" appears:
+
+  ```python
+    > ['DOC-19'(chunk 1), 'DOC-03', 'DOC-12', 'DOC-19'(chunk 1)]
+  ```
+
+  As you see in the 4th result with generous threshold of 0.3!
+  We predicted DOC-03 got there sooner than DOC-19 (chunk 2) and it happend.
+
+  Solution? using recursive chunking with overlap.
+  In next commit I will implement the recursive chunking with overlap.
+  Right now for baseline we have two tests that fail:
+  F   test02_multi_doc_direct_query
+  F   test03_multi_chunk_direct_query
+  They are supposed to fail!
+
+---

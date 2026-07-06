@@ -39,6 +39,22 @@ extention = [
             'stem packing at each inspection and log the seat leakage result.'
         )
     ),
+    Document(
+        id = 'DOC-19',
+        title = 'Compressor C-100 — Separator Element Replacement',
+        text = (
+            'The C-100 compressor undergoes extended maintenance checks beyond '
+            'the standard schedule. Technicians should verify belt tension, '
+            'inspect the intake filter for fouling, and confirm the control panel '
+            'shows no active fault codes before proceeding with disassembly of the '
+            'separator housing and the surrounding mounting brackets. '
+            'The air-oil separator element on this unit should be replaced every 4000 op'
+            # ------ here's where 400 chunk size breaks ------
+            'erating hours to maintain separation efficiency. '
+            'Log the replacement date and the part lot number in the maintenance '
+            'record for traceability.'
+        )
+    )
 ]
 
 EXTENDED_DOCS_FOR_BASELINE = baseline_docs + [e.model_dump() for e in extention]
@@ -47,6 +63,7 @@ my_pipeline_docs = load_docs_as_document('corpus.jsonl')
 EXTENDED_DOCS_FOR_MY_PIPELINE = my_pipeline_docs + extention
 
 TEST_SUIT = {
+    # Correctness
     't01_single_doc_direct_query': EvaluationTest(
         idx = 1,
         user_query = 'What is BRG-4410?',
@@ -58,6 +75,7 @@ TEST_SUIT = {
         )
     ),
 
+    # Recall
     't02_multi_doc_direct_query': EvaluationTest(
         idx = 2,
         user_query = 'What is the maximum operating pressure of the V-300 valve, and how often should it be inspected?',
@@ -68,6 +86,18 @@ TEST_SUIT = {
             '(DOC-16). Its actuator diaphragm and positioner should be '
             'inspected every 6 months, with seat leakage checked annually '
             '(DOC-17).'
+        )
+    ),
+
+    # Precison
+    't03_multi_chunk_direct_query': EvaluationTest(
+        idx = 3,
+        user_query = "How often should the C-100's air-oil separator element be replaced?",
+        expected_behaviour = 'answer',
+        expected_docs = ['DOC-19'],
+        expected_answer = (
+            'The air-oil separator element on the C-100 should be replaced '
+            'every 4000 operating hours.'
         )
     ),
 
