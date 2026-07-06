@@ -42,3 +42,64 @@
   data model.
 
 ---
+
+## Commit B: add evaluation data model
+
+  Nothing major to explain. Just added EvaluationTest and EvaluationResult
+  BaseModels as abstractions for how to do the evaluations.
+
+  Now I'm going to implement different evaluation unit tests for commit C.
+  I'll use "green" and "unittest" for unit test, because I have previous experience with it.
+
+---
+
+## Commit C: add 2 evaluation tests (correctness + recall)
+
+  I started writing correctness tests with unittest and "green" and after a
+  single test I spotted one big problem in the baseline implementation, It only
+  returns best-matching chunk!
+
+  What if user query's answer was spread among 2 or 3 docs?
+  We would never see anything from second or third document unless we wrote
+  a very detailed query with a large similarity between query and target document.
+
+  Here's the first diagnosis and the first point my implementation will diverge
+  from your baseline.
+
+  I created a module called my implementation and copy-pasted your functions.
+  I modified them to have better type hinting and safety and also changed argmax
+  logic to argpartition, I found argpartition in a stackoverflow thread from 14
+  years ago:
+
+  <https://stackoverflow.com/questions/6910641/how-do-i-get-indices-of-n-maximum-values-in-a-numpy-array>
+
+### AI Usage
+
+    I will be using claude for generating 2 other documents that common information
+    about one single item, so DOC-16 and DOC-17 content are ai-generated, cause
+    I'm lazy to write extention docs.
+
+  Okay I know it's a large patch to push for a commit but it's okay, cause I
+  diagnosed one issue and fixed it in my own implementation, now test number 2
+  t02_multi_doc_direct_query goes red for baseline if you run following command
+  but it goes green for my implementation.
+
+  ```bash
+    green -vvv evaluation
+  ```
+  
+  This was just a minor implementation bug, next I'm going to fix the bigger
+  issue: our chunking strategy!
+
+  Probably will add 2 more docs with more than 400 chars and put the answer to
+  user query in the exact chunk size threshold (400 characters).
+  Splitting mid sentence and with no overlap will break semantic connections.
+
+  In that case: even if you didn't have this previous bug and returned multiple
+  chunks(docs) ONLY ONE OF THOSE two most related chunks would appear at the
+  top of your results. This needs a kind of document that after 400 chars threshold
+  is not that similar to first chunk.
+
+---
+
+## Commit D: precision

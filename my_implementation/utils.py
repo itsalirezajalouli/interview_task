@@ -1,15 +1,15 @@
+# externals 
 import json
+from pydantic import StrictStr
 from typing_extensions import List
-from pydantic import BaseModel, StrictStr
 
-class Document(BaseModel):
-    id: StrictStr
-    title: StrictStr
-    text: StrictStr
+# internals
+from my_implementation.models import Document
 
-def load_docs(path: StrictStr) -> List[Document]:
+
+def load_docs_as_document(path: StrictStr) -> List[Document]:
     docs = []
-    with open(path, encoding="utf-8") as f:
+    with open(path, encoding='utf-8') as f:
         for line in f:
             line = line.strip()
             if line:
@@ -22,7 +22,3 @@ def load_docs(path: StrictStr) -> List[Document]:
                 )
     return docs
 
-if __name__ == '__main__':
-    docs = load_docs('corpus.jsonl')
-    for d in docs: 
-        print(d.title)

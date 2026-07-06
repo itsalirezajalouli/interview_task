@@ -45,6 +45,10 @@ def retrieve(query, chunks, vectors, model):
     q = model.encode([query])[0].astype("float32")
     q = q / np.linalg.norm(q)
     sims = vectors @ q
+    # FIX: This argmax here doesn't let me measure precision and recall,
+    # we have to be able to see all the similar docs cause what if user query's
+    # answer is in 2 seperate documents?
+    # print(f'retrieve sims: {sims}')
     best = int(np.argmax(sims))
     return chunks[best], float(sims[best])
 
@@ -52,7 +56,7 @@ def retrieve(query, chunks, vectors, model):
 def answer(query, chunks, vectors, model):
     hit, score = retrieve(query, chunks, vectors, model)
     # Returns the single best-matching chunk as the answer.
-    return f"[{hit['doc_id']} | {score:3f}] {hit['text']}"
+    return hit, score
 
 
 if __name__ == "__main__":

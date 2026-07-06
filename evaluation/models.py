@@ -6,11 +6,13 @@ class EvaluationTest(BaseModel):
     idx: StrictInt
 
     user_query: StrictStr
-    retrieved_docs: List[StrictStr] # List of document ids (names)
+    # I had retrieved_docs here which makes no sense for a test,
+    # moved it to result
 
+    # also these names made no sense, fixed them
     expected_behaviour: Literal['answer', 'abstain']
-    expected_behaviour_docs: List[StrictStr]
-    expected_behaviour_answer: StrictStr | None
+    expected_docs: List[StrictStr]
+    expected_answer: StrictStr | None
 
 
 class EvaluationResult(BaseModel):

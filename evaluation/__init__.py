@@ -1,0 +1,2 @@
+from evaluation.baseline_evaluation import BaselineEvaluationTests
+from evaluation.my_pipeline_evaluation import MyImplementationEvaluationTests
