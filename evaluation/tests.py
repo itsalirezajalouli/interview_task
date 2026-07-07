@@ -54,7 +54,29 @@ extention = [
             'Log the replacement date and the part lot number in the maintenance '
             'record for traceability.'
         )
-    )
+    ),
+    Document(
+        id = 'DOC-20',
+        title = 'Compressor C-100 — Inhibited Start States',
+        text = (
+            'Energisation of the C-100 drive motor is prohibited under any of '
+            'the following inhibiting states: oil sight glass below minimum, '
+            'thermostat reading above 45°C, or an uncleared fault on the '
+            'operator panel. Each inhibited attempt must be logged with a '
+            'reason code for traceability.'
+        )
+    ),
+    Document(
+        id = 'DOC-21',
+        title = 'Compressor C-100 — Startup Conditions',
+        text = (
+            'The C-100 compressor should only be started when all operating '
+            'conditions are confirmed within range. Before starting the C-100 '
+            'compressor, operators must verify that compressor start conditions '
+            'are satisfied. Check all C-100 startup conditions before each '
+            'start to confirm the unit is ready to run.'
+        )
+    ),
 ]
 
 EXTENDED_DOCS_FOR_BASELINE = baseline_docs + [e.model_dump() for e in extention]
@@ -101,4 +123,17 @@ TEST_SUIT = {
         )
     ),
 
+    # Ranking Quality (MRR)
+    't04_negation_direct_query': EvaluationTest(
+        idx = 4,
+        user_query = 'Under what conditions should the C-100 compressor not be started?',
+        expected_behaviour = 'answer',
+        expected_docs = ['DOC-20'],
+        expected_answer = (
+            'Do not start the C-100 compressor if the oil level is below the '
+            'minimum mark on the sight glass, if ambient temperature exceeds '
+            '45°C, or if any active fault code is displayed on the control '
+            'panel.'
+        )
+    ),
 }

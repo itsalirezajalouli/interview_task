@@ -115,3 +115,35 @@ class BaselineEvaluationTests(unittest.TestCase):
                 'Retrieved document content should match expected document content exactly'
             )
 
+    def test04_negation_direct_query(self):
+        query = TEST_SUIT['t04_negation_direct_query'].user_query
+        expected_docs = TEST_SUIT['t04_negation_direct_query'].expected_docs
+
+        chunk, _ = answer(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model
+        )
+
+        self.assertIn(
+            chunk['doc_id'], # type: ignore
+            expected_docs,
+            'Retrieved document should be in expected documents.'
+        )
+
+        #chunks, vectors = build_index_w_doc_model(
+        #    EXTENDED_DOCS_FOR_MY_PIPELINE,
+        #    self.model
+        #)
+        #answerz = answer_w_topk(
+        #    query,
+        #    chunks,
+        #    vectors,
+        #    self.model,
+        #    0.3 # let's be generous and see when "DOC-19-chunk-2" appears in the list
+        #)
+
+        # just to measure MRR
+        #print(answerz)
+        # MRR = 1/5! amazing XD

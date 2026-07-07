@@ -184,3 +184,52 @@
   together but here we are not talking about stories spread between different
   lines in different places of the corpus so recursive chunking is good enough
   and I decided not to implement semantic chunking!
+
+---
+
+## Commit F: add negation evaluation test (MRR/Ranking quality)
+
+  There is a solid metric for rag evaluation called "Mean Reciprocal Rank" which
+  is 1 / position_of_correct_answer.
+  It measures how we rank the correct answer?
+  Like we expect the correct answer to be number 1 but if it appears number
+  2 -> then 1/2 = 0.5, and if appears number 3 then 1/3 = 0.34.
+
+  What we have here currently is a bi-encoder implementation, meaning query
+  gets embeded and also docs. Common issue with this implementations is NEGATION!
+
+  Not going to elaborate more till we have a test, and then I will show you what
+  it is.
+
+  I extended documents with 2 new docs: DOC-20 and DOC-21
+
+### AI Usage
+
+    I asked claude to generate 2 new docs resembeling DOC-03 but with negating
+    conflicts. One of them talk about how to start C-100 compressor and one of
+    of them talks about how it should NOT to strated!
+    I got a little evil here and told claude to fill DOC-21 (wrong doc) with
+    words in the test query:  C-100 compressor, started, conditions,
+    starting, start.
+
+  Test user query:
+  "Under what conditions should the C-100 compressor not be started?"
+
+  Added a test number 4 to baseline_evaluation.py and it got red:
+
+  > AssertionError: 'DOC-21' not found in ['DOC-20'] : Retrieved document should be in expected documents.
+  
+  As expected it returned wrong document. But I went further and lifted the issue
+  with one best match to see where in results we see the correct answer to measure
+  our MRR:
+
+```python
+  [(Chunk(id='DOC-21', title='Compressor C-100 — Startup Conditions', text='The C-100 compressor should only be started when all operating conditions are confirmed within range. '), 0.8941630721092224), (Chunk(id='DOC-21', title='Compressor C-100 — Startup Conditions', text='Before starting the C-100 compressor, operators must verify that compressor start conditions are satisfied. Check all C-100 startup conditions before each start to confirm the unit is ready to run.'), 0.8186443448066711), (Chunk(id='DOC-19', title='Compressor C-100 — Separator Element Replacement', text='The C-100 compressor undergoes extended maintenance checks beyond the standard schedule. Technicians should verify belt tension, inspect the intake filter for fouling, '), 0.6730542778968811), (Chunk(id='DOC-03', title='Compressor C-100 — Specifications', text='The C-100 is a rotary screw air compressor. Rated output is 6 m3/min at 8 bar. Motor power is 37 kW. It includes an integrated air-oil separator and an after-cooler. '), 0.5356651544570923), (Chunk(id='DOC-20', title='Compressor C-100 — Inhibited Start States', text='Energisation of the C-100 drive motor is prohibited under any of the following inhibiting states: oil sight glass below minimum, thermostat reading above 45°C, '), 0.4197276532649994)]
+```
+
+  Brah! AMAZING! DOC-20 is in 5th rank!!!!!!!
+  BASELINE's MRR IS 1/5 = 20 %
+  HILLARITY XD!!!
+
+  We definitely need a re-ranker to fix this.
+  And that's what I'm going to implement in next commit.
