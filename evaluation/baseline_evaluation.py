@@ -115,6 +115,7 @@ class BaselineEvaluationTests(unittest.TestCase):
                 'Retrieved document content should match expected document content exactly'
             )
 
+    # Ranking Quality (MRR)
     def test04_negation_direct_query(self):
         query = TEST_SUIT['t04_negation_direct_query'].user_query
         expected_docs = TEST_SUIT['t04_negation_direct_query'].expected_docs
@@ -132,6 +133,8 @@ class BaselineEvaluationTests(unittest.TestCase):
             'Retrieved document should be in expected documents.'
         )
 
+        # this is how i measured MRR but didn't clean up to show how i
+        # found it out
         #chunks, vectors = build_index_w_doc_model(
         #    EXTENDED_DOCS_FOR_MY_PIPELINE,
         #    self.model
@@ -147,3 +150,26 @@ class BaselineEvaluationTests(unittest.TestCase):
         # just to measure MRR
         #print(answerz)
         # MRR = 1/5! amazing XD
+
+    # Lexical Precision
+    def test05_exact_code__direct_query(self):
+        query = TEST_SUIT['t05_exact_code__direct_query'].user_query
+        expected_docs = TEST_SUIT['t05_exact_code__direct_query'].expected_docs
+
+        chunks, vectors = build_index_w_doc_model(
+            EXTENDED_DOCS_FOR_MY_PIPELINE,
+            self.model
+        )
+        answer = answer_w_topk(
+            query,
+            chunks,
+            vectors,
+            self.model,
+            0.6
+        )
+        retrieved_docs = [c.id for c, _ in answer]
+        self.assertEqual(
+            retrieved_docs,
+            expected_docs,
+            'Retrieved document should be in expected documents.'
+        )

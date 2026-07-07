@@ -123,6 +123,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
                 f'Retrieved answer score should be greater or equal to {self.score_threshold}.'
             )
 
+    # Ranking Quality (MRR)
     def test04_negation_direct_query(self):
         query = TEST_SUIT['t04_negation_direct_query'].user_query
         expected_docs = TEST_SUIT['t04_negation_direct_query'].expected_docs
@@ -152,3 +153,4 @@ class MyImplementationEvaluationTests(unittest.TestCase):
             'Retrieved document content should match expected document content exactly'
         )
 
+    # Lexical Precision

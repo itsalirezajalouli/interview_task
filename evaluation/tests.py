@@ -77,6 +77,29 @@ extention = [
             'start to confirm the unit is ready to run.'
         )
     ),
+    Document(
+        id = 'DOC-22',
+        title = 'Error Code E-04 — Overtemperature Fault',
+        text = (
+            'Error code E-04 indicates the compressor discharge temperature '
+            'has exceeded the safe operating limit. Check the cooling fan '
+            'operation, inspect the oil cooler for blockage, and verify '
+            'ambient temperature is within specification. The unit will not '
+            'restart until temperature drops below the reset threshold and '
+            'the fault is manually cleared.'
+        )
+    ),
+    Document(
+        id = 'DOC-23',
+        title = 'Error Code E-05 — Low Oil Pressure Fault',
+        text = (
+            'Error code E-05 indicates oil pressure has dropped below the '
+            'minimum operating threshold. Check the oil level in the sight '
+            'glass, inspect the oil filter for blockage, and verify the oil '
+            'pump is functioning. The unit will not restart until oil pressure '
+            'is restored and the fault is manually cleared.'
+        )
+    ),
 ]
 
 EXTENDED_DOCS_FOR_BASELINE = baseline_docs + [e.model_dump() for e in extention]
@@ -135,4 +158,15 @@ TEST_SUIT = {
             'or active fault codes are present on the control panel. '
         )
     ),
+
+    # Lexical Precision
+    't05_exact_code__direct_query': EvaluationTest(
+        idx = 5,
+        user_query = 'What does error code E-04 indicate?',
+        expected_behaviour = 'answer',
+        expected_docs = ['DOC-22'],
+        expected_answer = (
+            ''
+        )
+    )
 }

@@ -314,3 +314,38 @@
   whole corpus and take average to see actual MRR, but definitely improved it)
 
 ---
+
+## Commit H: add lexical precision evaluation test
+
+  Look at the corpus! there are error codes there: E-207, E-208. This is corpus is
+  begging for a lexical failure to happen. Why? E-207 and E-208 get embeded to very
+  similar vectors (part of vectors) with dense embeddings but they are actually
+  different things and if we search for one of them both of them shouldn't appear
+  in the result.
+
+  But we are not sure that happens in baseline! so we need to evaluate with document
+  extentions:
+
+### AI Usage
+
+    Again I used claude to extend docs DOC-22 and DOC-23.
+    I prompted it to create documents with identical identical lexical
+    error codes like E-207 and E-208 so when user asks "What does error code X mean?" 
+    both docs would be retrieved.
+
+  Then I added a new test to baseline_evaluation.py called t05_exact_code__direct_query.
+  The new test will check if only exact code asked in the query comes in the
+  results or other docs come up too...
+
+    AssertionError: Lists differ: ['DOC-22', 'DOC-23', 'DOC-07'] != ['DOC-22']
+
+    First list contains 2 additional elements.
+    First extra element 1:
+    'DOC-23'
+
+    - ['DOC-22', 'DOC-23', 'DOC-07']
+    + ['DOC-22'] : Retrieved document should be in expected documents.
+
+  It fails! as expected.
+  In next commit I will implement BM25 and add it as hybrid retrieval to my
+  RAG pipline, this should make the test green in my pipline evaluation.
