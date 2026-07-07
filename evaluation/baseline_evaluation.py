@@ -173,3 +173,76 @@ class BaselineEvaluationTests(unittest.TestCase):
             expected_docs,
             'Retrieved document should be in expected documents.'
         )
+
+    # Abstain — in-domain, not in corpus
+    def test06_abstain_in_domain(self):
+        query = TEST_SUIT['t06_abstain_in_domain'].user_query
+        expected_docs = TEST_SUIT['t06_abstain_in_domain'].expected_docs
+
+        chunk, _ = answer(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model
+        )
+
+        self.assertIn(
+            chunk['doc_id'], # type: ignore
+            expected_docs,
+            'Baseline should abstain but fabricated a result.'
+        )
+
+        self.assertEqual(
+            len([chunk]),
+            len(expected_docs),
+            'Retrieved documents should be empty for abstain queries.',
+        )
+
+    # Abstain — near-miss (C-200 exists but no specs)
+    def test07_abstain_near_miss(self):
+        query = TEST_SUIT['t07_abstain_near_miss'].user_query
+        expected_docs = TEST_SUIT['t07_abstain_near_miss'].expected_docs
+
+        # Use extended docs so DOC-24 (C-200 overview) is in the index
+        chunks, vectors = build_index_w_doc_model(
+            EXTENDED_DOCS_FOR_MY_PIPELINE,
+            self.model
+        )
+        answer = answer_w_topk(
+            query,
+            chunks,
+            vectors,
+            self.model,
+            0.3
+        )
+
+        retrieved_docs = [c.id for c, _ in answer]
+        self.assertEqual(
+            retrieved_docs,
+            expected_docs,
+            'Baseline should abstain but fabricated a result.',
+        )
+
+    # Abstain — out-of-domain
+    def test08_abstain_out_of_domain(self):
+        query = TEST_SUIT['t08_abstain_out_of_domain'].user_query
+        expected_docs = TEST_SUIT['t08_abstain_out_of_domain'].expected_docs
+
+        chunk, _ = answer(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model
+        )
+
+        self.assertIn(
+            chunk['doc_id'], # type: ignore
+            expected_docs,
+            'Baseline should abstain but fabricated a result.'
+        )
+
+        self.assertEqual(
+            len([chunk]),
+            len(expected_docs),
+            'Retrieved documents should be empty for abstain queries.',
+        )

@@ -100,6 +100,18 @@ extention = [
             'is restored and the fault is manually cleared.'
         )
     ),
+    Document(
+        id = 'DOC-24',
+        title = 'Compressor C-200 — Preliminary Overview',
+        text = (
+            'The C-200 is a new rotary screw compressor model currently in '
+            'the product development pipeline. It builds on the C-100 platform '
+            'with improved efficiency targets. Detailed specifications, '
+            'performance data, and maintenance schedules will be published in '
+            'a future service bulletin. For interim inquiries refer to the '
+            'product management team.'
+        )
+    ),
 ]
 
 EXTENDED_DOCS_FOR_BASELINE = baseline_docs + [e.model_dump() for e in extention]
@@ -168,5 +180,32 @@ TEST_SUIT = {
         expected_answer = (
             ''
         )
-    )
+    ),
+
+    # Abstain — in-domain, not in corpus
+    't06_abstain_in_domain': EvaluationTest(
+        idx = 6,
+        user_query = 'What is the oil change interval for the C-100 compressor?',
+        expected_behaviour = 'abstain',
+        expected_docs = [],
+        expected_answer = None,
+    ),
+
+    # Abstain — near-miss (C-200 exists but no specs)
+    't07_abstain_near_miss': EvaluationTest(
+        idx = 7,
+        user_query = 'What is the rated output of the C-200 compressor?',
+        expected_behaviour = 'abstain',
+        expected_docs = [],
+        expected_answer = None,
+    ),
+
+    # Abstain — out-of-domain
+    't08_abstain_out_of_domain': EvaluationTest(
+        idx = 8,
+        user_query = 'What is the recommended tire pressure for the warehouse forklift?',
+        expected_behaviour = 'abstain',
+        expected_docs = [],
+        expected_answer = None,
+    ),
 }

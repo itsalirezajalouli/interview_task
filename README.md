@@ -375,3 +375,37 @@
   All 5 tests green. Also moved self.score_threshold out of setUp cause
   each query has different reranker score distributions anyway and that comment
   "I might change this, no reason for this number" was embarrassing me.
+
+---
+
+## J: add abstain evaluation (avoids fabrication)
+
+  Well, can't lie... You licked your private_eval.jsonl and I can't hide the fact
+  that I saw your abstain tests.
+  
+  I chose 3 abstain category for pipeline:
+
+- in-domain: information is relevant but not in the corpus -> don't hallucinate
+- near-miss: words in the query exist in corpus but specific details of the query don't
+- out-of-domain: information is irrelevant AND out of corpus
+
+### AI Usage
+
+    Asked claude to create a new documentation called DOC-24 for near-miss.
+    It's a trap for fabrication.
+
+  Then added 3 tests to baseline evaluation for each category. like previous
+  baseline tests, these ones failed too:
+  
+    F   test06_abstain_in_domain      -> returned DOC-03 (C-100 specs)
+    F   test07_abstain_near_miss      -> returned DOC-03 (C-100 specs) at rank 1,
+                                        DOC-24 (C-200 overview) at rank 2
+    F   test08_abstain_out_of_domain  -> returned DOC-02 (P-200 maintenance)
+
+  This happens because baseline's answer() function uses argmax which ALWAYS
+  returns something from candidates.
+
+  FIX: I will use reranker as confidence signal and force abstaining for lower
+  than a specific threshold.
+
+---
