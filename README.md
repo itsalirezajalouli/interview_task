@@ -349,3 +349,29 @@
   It fails! as expected.
   In next commit I will implement BM25 and add it as hybrid retrieval to my
   RAG pipline, this should make the test green in my pipline evaluation.
+
+---
+
+## Commit I: hybrid retrieval (fix lexical precision)
+
+  BM25: Added hybrid_retrieve to retrieval.py. It uses dense cosine similarity
+  with BM25 scores in a formula that mixes them with a multiple called alpha,
+  it normalizes both scores to 0,1.
+
+  For test05 the fix is simple: E-04 and E-05 are lexically different strings
+  but dense embeddings see them equal. BM25 doesn't care about meaning, it
+  sees "e-04" in the query and boosts the document. DOC-22 will get a score of 1.0.
+
+  I made a mistake and swapped all answer_w_reranks in test to hybrid_retrieve.
+  The negation test failed because bi-encoders can't handle "not" with BM25.
+
+  So I kept the reranker step from answer_w_rerank but fed it hybrid candidates
+  instead of pure dense candidates, now it goes like this:
+
+  1. hybrid_retrieve
+  2. rerank
+  3. filter by threshold
+
+  All 5 tests green. Also moved self.score_threshold out of setUp cause
+  each query has different reranker score distributions anyway and that comment
+  "I might change this, no reason for this number" was embarrassing me.

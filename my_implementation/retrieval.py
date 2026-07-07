@@ -1,5 +1,6 @@
 # externals
 import numpy as np
+from rank_bm25 import BM25Okapi
 from numpy.typing import NDArray
 from typing_extensions import List, Tuple
 from pydantic import StrictFloat, StrictStr, StrictInt
@@ -73,3 +74,31 @@ def answer_w_rerank(
     reranked_chunks = rerank(query, retrieved_chunks, reranker)
 
     return reranked_chunks
+
+def normalize_dense_scores(scores: NDArray):
+    lo, hi = scores.min(), scores.max()
+    return (scores - lo) / (hi - lo) if hi != lo else np.zeros_like(scores)
+
+
+def hybrid_retrieve(
+    query: StrictStr,
+    chunks: List[Chunk],
+    vectors: NDArray[np.float64],
+    model: SentenceTransformer,
+    bm25: BM25Okapi,
+    top_k: StrictInt = 5,
+    alpha: float = 0.5, # this sets the mix ratio between bm25 and cosine similarity(semantic search)
+) -> List[Tuple[Chunk, float]]:
+    # same as before
+    q = model.encode([query])[0].astype('float32')
+    q = q / np.linalg.norm(q)
+    dense_scores = vectors @ q
+
+    # new
+    bm25_scores = np.array(bm25.get_scores(query.lower().split()))
+    hybrid_scores = alpha * normalize_dense_scores(dense_scores) + (1 - alpha) * normalize_dense_scores(bm25_scores)
+
+    ordered_ind = np.argpartition(hybrid_scores, -top_k)[-top_k:][::-1]
+    return [
+        (chunks[int(i)], float(hybrid_scores[i])) for i in ordered_ind
+    ]

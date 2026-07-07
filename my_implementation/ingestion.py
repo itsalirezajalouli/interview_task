@@ -1,5 +1,6 @@
 # externals 
 import numpy as np
+from rank_bm25 import BM25Okapi
 from numpy.typing import NDArray
 from typing_extensions import List, Tuple
 from sentence_transformers import SentenceTransformer
@@ -37,3 +38,6 @@ def build_index_w_doc_model(
     vectors = vectors / np.linalg.norm(vectors, axis = 1, keepdims = True)
     return chunks, vectors
 
+def build_bm25_index(chunks: List[Chunk]) -> BM25Okapi:
+    corpus = [chunk.text.lower().split() for chunk in chunks]
+    return BM25Okapi(corpus)

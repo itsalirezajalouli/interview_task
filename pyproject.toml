@@ -8,5 +8,6 @@ dependencies = [
     "green>=4.0.2",
     "numpy>=2.5.1",
     "pydantic>=2.13.4",
+    "rank-bm25>=0.2.2",
     "sentence-transformers>=5.6.0",
 ]
