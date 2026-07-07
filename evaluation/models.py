@@ -13,13 +13,3 @@ class EvaluationTest(BaseModel):
     expected_behaviour: Literal['answer', 'abstain']
     expected_docs: List[StrictStr]
     expected_answer: StrictStr | None
-
-
-class EvaluationResult(BaseModel):
-    test_idx: StrictInt
-
-    retrieved_docs: List[StrictStr] # List of document ids (names)
-    hit: bool # Was actual doc in retrieved_docs? 
-    actual_behavior: Literal['answer', 'abstain']
-
-    passed: bool

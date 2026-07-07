@@ -6,12 +6,12 @@ from sentence_transformers import SentenceTransformer, CrossEncoder
 from my_implementation.retrieval import hybrid_retrieve, rerank
 # NOTE: answer_w_rerank replaced by hybrid_retrieve + rerank for all tests
 # from my_implementation.retrieval import answer_w_rerank, hybrid_retrieve
-from evaluation.tests import TEST_SUIT, EXTENDED_DOCS_FOR_MY_PIPELINE
+from evaluation.tests import TEST_SUIT
+from evaluation.docs_extension import EXTENDED_DOCS_FOR_MY_PIPELINE
 from my_implementation.ingestion import build_index_w_doc_model, build_bm25_index
 
 class MyImplementationEvaluationTests(unittest.TestCase):
     def setUp(self) -> None:
-        # TODO: later will import load_extended_docs from evaluation.tests
         self.docs = EXTENDED_DOCS_FOR_MY_PIPELINE
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
         self.reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')

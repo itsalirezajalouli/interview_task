@@ -10,7 +10,7 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-CORPUS_PATH = "corpus.jsonl"
+CORPUS_PATH = "baseline/corpus.jsonl"
 CHUNK_SIZE = 400
 EMBED_MODEL = "all-MiniLM-L6-v2"
 

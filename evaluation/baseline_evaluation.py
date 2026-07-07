@@ -3,18 +3,14 @@ import unittest
 from sentence_transformers import SentenceTransformer
 
 # internals
-from baseline_rag import build_index, answer
-from evaluation.tests import (
-    TEST_SUIT,
-    EXTENDED_DOCS_FOR_BASELINE,
-    EXTENDED_DOCS_FOR_MY_PIPELINE,
-)
+from baseline.baseline_rag import build_index, answer
+from evaluation.tests import TEST_SUIT
+from evaluation.docs_extension import EXTENDED_DOCS_FOR_BASELINE, EXTENDED_DOCS_FOR_MY_PIPELINE
 from my_implementation.retrieval import answer_w_topk
 from my_implementation.ingestion import build_index_w_doc_model
 
 class BaselineEvaluationTests(unittest.TestCase):
     def setUp(self) -> None:
-        # TODO: later will import load_extended_docs from evaluation.tests
         self.docs = EXTENDED_DOCS_FOR_BASELINE
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
         self.chunks, self.vectors = build_index(self.docs, self.model)
