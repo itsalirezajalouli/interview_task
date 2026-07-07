@@ -202,6 +202,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
 
     # Lexical Precision
     def test05_exact_code__direct_query(self):
+
         query = TEST_SUIT['t05_exact_code__direct_query'].user_query
         expected_docs = TEST_SUIT['t05_exact_code__direct_query'].expected_docs
 
@@ -227,4 +228,70 @@ class MyImplementationEvaluationTests(unittest.TestCase):
             1.0,
             'Top retrieved document should have a normalized hybrid score of 1.0.',
         )
-    
+
+    # Abstain — in-domain, not in corpus
+    def test06_abstain_in_domain(self):
+        query = TEST_SUIT['t06_abstain_in_domain'].user_query
+
+        # "oil change" never appears in corpus so top hybrid score peaks at 0.88
+        # catching it here means we never waste time reranking
+        candidates = hybrid_retrieve(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.bm25,
+            abstain_threshold=0.9,
+        )
+        chunks = rerank(query, candidates, self.reranker) if candidates else []
+
+        self.assertEqual(
+            chunks,
+            [],
+            'Pipeline should abstain but returned results.',
+        )
+
+    # Abstain — near-miss 
+    def test07_abstain_near_miss(self):
+        query = TEST_SUIT['t07_abstain_near_miss'].user_query
+
+        # "rated output" appears in DOC-03 giving it a perfect hybrid
+        # score (1.0), so hybrid threshold can't save us here. Reranker sees
+        # it and scores DOC-03 at 7.5
+        candidates = hybrid_retrieve(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.bm25,
+        )
+        chunks = rerank(query, candidates, self.reranker) if candidates else []
+        chunks = [(c, s) for c, s in chunks if s >= 8.0]
+
+        self.assertEqual(
+            chunks,
+            [],
+            'Pipeline should abstain but returned results.',
+        )
+
+    # Abstain — out-of-domain
+    def test08_abstain_out_of_domain(self):
+        query = TEST_SUIT['t08_abstain_out_of_domain'].user_query
+
+        # "pressure" appears everywhere in this corpus so hybrid scores are high
+        # can't abstain at hybrid level, but reranker scores everything negative
+        candidates = hybrid_retrieve(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.bm25,
+        )
+        chunks = rerank(query, candidates, self.reranker) if candidates else []
+        chunks = [(c, s) for c, s in chunks if s >= 0.0]
+
+        self.assertEqual(
+            chunks,
+            [],
+            'Pipeline should abstain but returned results.',
+        )

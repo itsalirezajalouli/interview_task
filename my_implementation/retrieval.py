@@ -88,6 +88,7 @@ def hybrid_retrieve(
     bm25: BM25Okapi,
     top_k: StrictInt = 5,
     alpha: float = 0.5, # this sets the mix ratio between bm25 and cosine similarity(semantic search)
+    abstain_threshold: float | None = None,
 ) -> List[Tuple[Chunk, float]]:
     # same as before
     q = model.encode([query])[0].astype('float32')
@@ -99,6 +100,11 @@ def hybrid_retrieve(
     hybrid_scores = alpha * normalize_dense_scores(dense_scores) + (1 - alpha) * normalize_dense_scores(bm25_scores)
 
     ordered_ind = np.argpartition(hybrid_scores, -top_k)[-top_k:][::-1]
+
+    # if even the best candidate is too weak, nothing to answer here
+    if abstain_threshold is not None and hybrid_scores[ordered_ind[0]] <= abstain_threshold:
+        return []
+
     return [
         (chunks[int(i)], float(hybrid_scores[i])) for i in ordered_ind
     ]

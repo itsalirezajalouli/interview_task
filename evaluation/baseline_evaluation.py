@@ -198,7 +198,7 @@ class BaselineEvaluationTests(unittest.TestCase):
             'Retrieved documents should be empty for abstain queries.',
         )
 
-    # Abstain — near-miss (C-200 exists but no specs)
+    # Abstain — near-miss 
     def test07_abstain_near_miss(self):
         query = TEST_SUIT['t07_abstain_near_miss'].user_query
         expected_docs = TEST_SUIT['t07_abstain_near_miss'].expected_docs
