@@ -1,10 +1,10 @@
 # externals
 import unittest
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 
 # internals
 from my_implementation.ingestion import build_index_w_doc_model
-from my_implementation.retrieval import answer_w_topk
+from my_implementation.retrieval import answer_w_rerank
 from evaluation.tests import TEST_SUIT, EXTENDED_DOCS_FOR_MY_PIPELINE
 
 class MyImplementationEvaluationTests(unittest.TestCase):
@@ -12,6 +12,7 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         # TODO: later will import load_extended_docs from evaluation.tests
         self.docs = EXTENDED_DOCS_FOR_MY_PIPELINE
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
         self.chunks, self.vectors = build_index_w_doc_model(self.docs, self.model)
         self.score_threshold = 0.6 # I might change this, no reason for this number
 
@@ -21,11 +22,12 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         expected_docs = TEST_SUIT['t01_single_doc_direct_query'].expected_docs
         expected_answer = TEST_SUIT['t01_single_doc_direct_query'].expected_answer
 
-        chunks = answer_w_topk(
+        chunks = answer_w_rerank(
             query,
             self.chunks,
             self.vectors,
             self.model,
+            self.reranker,
             self.score_threshold
         )
 
@@ -61,11 +63,12 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         query = TEST_SUIT['t02_multi_doc_direct_query'].user_query
         expected_docs = TEST_SUIT['t02_multi_doc_direct_query'].expected_docs
 
-        chunks = answer_w_topk(
+        chunks = answer_w_rerank(
             query,
             self.chunks,
             self.vectors,
             self.model,
+            self.reranker,
             self.score_threshold
         )
 
@@ -94,11 +97,12 @@ class MyImplementationEvaluationTests(unittest.TestCase):
         expected_docs = TEST_SUIT['t03_multi_chunk_direct_query'].expected_docs
         expected_answer = TEST_SUIT['t03_multi_chunk_direct_query'].expected_answer
 
-        chunks = answer_w_topk(
+        chunks = answer_w_rerank(
             query,
             self.chunks,
             self.vectors,
             self.model,
+            self.reranker,
             self.score_threshold
         )
 
@@ -118,3 +122,33 @@ class MyImplementationEvaluationTests(unittest.TestCase):
                 self.score_threshold,
                 f'Retrieved answer score should be greater or equal to {self.score_threshold}.'
             )
+
+    def test04_negation_direct_query(self):
+        query = TEST_SUIT['t04_negation_direct_query'].user_query
+        expected_docs = TEST_SUIT['t04_negation_direct_query'].expected_docs
+        expected_answer = TEST_SUIT['t04_negation_direct_query'].expected_answer
+
+        ranked_chunks = answer_w_rerank(
+            query,
+            self.chunks,
+            self.vectors,
+            self.model,
+            self.reranker,
+            self.score_threshold
+        )
+
+        first_candidate, _ = ranked_chunks[0]
+
+        self.assertEqual(
+            [first_candidate.id],
+            expected_docs,
+            'Retrieved document should be equal expected document.'
+        )
+
+        print(first_candidate.text)
+        self.assertEqual(
+            first_candidate.text,
+            expected_answer,
+            'Retrieved document content should match expected document content exactly'
+        )
+

@@ -233,3 +233,84 @@
 
   We definitely need a re-ranker to fix this.
   And that's what I'm going to implement in next commit.
+
+---
+
+## Commit G: add re-ranking (fix MRR/Ranking quality)
+
+  OK, take a look at retrieve at baseline_rag.py retrieve function:
+
+  ```python
+  def retrieve(query, chunks, vectors, model):
+      q = model.encode([query])[0].astype("float32")
+      q = q / np.linalg.norm(q)
+      sims = vectors @ q
+  ```
+
+  This is BI-ENCODING. We encode/embed query and we encode/embed docs (to vectors).
+  Then we do cosine similarity (vectors @ q) to retrieve.
+
+  The issue with bi-encoding is that query and documentation embeddings are
+  independent. They have been embedded seperately. To fix ranking quality we
+  need a solution that embeds query and documentation with regards to each other.
+  Meaning they should get embedded together. It's called "Cross encoding" and it's
+  slower than bi-encoding but it's more accurate.
+
+  My laptop is a potato lenovo ideapad so I didn't go to hugging face leaderboard
+  for best re-ranker model, the library baseline rag uses "Sentence Transformer"
+  has a cross encoder called "ms-marco-MiniLM-L-6-v2".
+
+  I added one function called rerank to retrieval.py and another function called
+  answer_w_rerank, I didn't touch answer_w_topk to not break backward compatability
+  of previous baseline tests.
+
+  In rerank function implementation I used argsort which returns the indexes
+  that sort the array. Then added test number 4 to my_implementation_evaluation.py
+  and added an attribute called self.reranker that uses CrossEncoder class and
+  ms-marco-MiniLM-L-6-v2.
+
+### AI Mistake (!!!!!)
+
+    Okay DOC-20 that claude generated in previous commit was using vocabulary 
+    that made DOC-20 out of the options for first bi-encoding retrieval.
+    So even my pipline couldn't get DOC-20 as relevant so re-ranker wouldn't help.
+  
+    I had to re-iterate the generation of DOC-20. baseline still fails on test 04 so
+    nothing unfair happend here.
+
+  After fixing that I ran the tests and:
+
+    evaluation.baseline_evaluation
+      BaselineEvaluationTests
+    .   test01_single_doc_direct_query
+    F   test02_multi_doc_direct_query
+    F   test03_multi_chunk_direct_query
+    F   test04_negation_direct_query
+
+    evaluation.my_pipeline_evaluation
+      MyImplementationEvaluationTests
+    .   test01_single_doc_direct_query
+    .   test02_multi_doc_direct_query
+    .   test03_multi_chunk_direct_query
+    .   test04_negation_direct_query
+
+  Now First rank is for DOC-20 and answer matches exactly that part:
+    (Chunk(id='DOC-20', title='Compressor C-100 — No-Start Conditions', text='The C-100 compressor must not be started if oil level is below the minimum sight glass mark, ambient temperature exceeds 45°C, or active fault codes are present on the control panel. ')
+
+  Definitely got more accurate, Now we have MRR of 1/1 = 100% .
+  BUT! TRADEOFF:
+
+  if you run:
+
+  time green -vvv evaluation.baseline_evaluation
+  time green -vvv evaluation.my_pipeline_evaluation
+
+  green -vvv evaluation.baseline_evaluation  11.00s user 1.13s system 32% cpu 37.613 total
+  green -vvv evaluation.my_pipeline_evaluation  11.91s user 1.30s system 18% cpu 1:12.72 total
+
+  My pipline is 1.95 times slower! for cross encoder additon. Better hardware
+  would help here but it's a trade-off that's worth it. We bumped MRR from
+  20% to 100% that's a big win(not actually though... we should measure through
+  whole corpus and take average to see actual MRR, but definitely improved it)
+
+---

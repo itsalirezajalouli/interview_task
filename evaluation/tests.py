@@ -57,13 +57,13 @@ extention = [
     ),
     Document(
         id = 'DOC-20',
-        title = 'Compressor C-100 — Inhibited Start States',
+        title = 'Compressor C-100 — No-Start Conditions',
         text = (
-            'Energisation of the C-100 drive motor is prohibited under any of '
-            'the following inhibiting states: oil sight glass below minimum, '
-            'thermostat reading above 45°C, or an uncleared fault on the '
-            'operator panel. Each inhibited attempt must be logged with a '
-            'reason code for traceability.'
+            'The C-100 compressor must not be started if oil level is below '
+            'the minimum sight glass mark, ambient temperature exceeds 45°C, '
+            'or active fault codes are present on the control panel. '
+            'Starting the C-100 compressor under any of these conditions '
+            'will trigger an automatic shutdown.'
         )
     ),
     Document(
@@ -130,10 +130,9 @@ TEST_SUIT = {
         expected_behaviour = 'answer',
         expected_docs = ['DOC-20'],
         expected_answer = (
-            'Do not start the C-100 compressor if the oil level is below the '
-            'minimum mark on the sight glass, if ambient temperature exceeds '
-            '45°C, or if any active fault code is displayed on the control '
-            'panel.'
+            'The C-100 compressor must not be started if oil level is below '
+            'the minimum sight glass mark, ambient temperature exceeds 45°C, '
+            'or active fault codes are present on the control panel. '
         )
     ),
 }
